@@ -1,0 +1,15 @@
+[build-system]
+requires = ["scikit-build-core", "numpy>=2.0.0"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "cpyutl"
+version = "0.1.0"
+description = "A utility package for CPython projects."
+authors = [{ name = "Jan", email = "r0th.j4n@gmail.com" }]
+# readme = "README.md"
+license = { text = "GPL3" }
+dependencies = ["scikit-build-core", "numpy>=2.0.0"]
+
+[project.optional-dependencies]
+dev = ["pre-commit", "ruff", "mypy"]
