@@ -240,4 +240,7 @@ CPYUTL_INTERNAL CPYUTL_NORETURN void cpyutl_failure_exit(const char *fmt, ...);
 
 #endif
 
+CPYUTL_INTERNAL
+PyTypeObject *cpyutl_add_type_from_spec_to_module(PyObject *module, PyType_Spec *spec, PyObject *bases);
+
 #endif // CPYUTL_LIBRARY_H
