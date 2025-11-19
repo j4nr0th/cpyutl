@@ -1,5 +1,8 @@
 #include "cpyutl.h"
 
+#ifndef NPY_NO_DEPRECATED_API
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#endif
 #include <numpy/ndarrayobject.h>
 
 CPYUTL_INTERNAL
@@ -230,7 +233,8 @@ cpyutl_argument_status_t extract_argument_value(const unsigned i, PyObject *cons
             return CPYARG_INVALID;
         break;
 
-    case CPYARG_TYPE_SEQUENCE: {
+    case CPYARG_TYPE_SEQUENCE:
+    {
         PyObject *const fast_seq = PySequence_Fast(val, "Expected a sequence.");
         if (!fast_seq)
             return CPYARG_INVALID;
@@ -627,4 +631,28 @@ void cpyutl_failure_exit(const char *fmt, ...)
     va_end(args);
     fputc('\n', stderr);
     exit(1);
+}
+
+PyTypeObject *cpyutl_add_type_from_spec_to_module(PyObject *module, PyType_Spec *spec, PyObject *bases)
+{
+    PyTypeObject *const type = (PyTypeObject *)PyType_FromMetaclass(NULL, module, spec, bases);
+    if (!type)
+    {
+        return NULL;
+    }
+    const char *name = spec->name;
+
+    const char *last_pos = strrchr(name, '.');
+    if (last_pos)
+        name = last_pos + 1;
+
+    const int res = PyModule_AddObjectRef(module, name, (PyObject *)type);
+    Py_DECREF(type);
+
+    if (res < 0)
+    {
+        return NULL;
+    }
+
+    return type;
 }
