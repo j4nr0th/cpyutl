@@ -204,10 +204,37 @@ struct cpyutl_output_t
     const char *name; // Must be non-NULL when part of a dict.
 };
 
+/**
+ * @brief Creates a Python object (tuple, list, or dictionary) based on the specified type and output specifications.
+ *
+ * This function constructs a Python object of the specified type (e.g., tuple, list, or dictionary)
+ * and populates it with values as described in the output specifications. If the output type is not
+ * valid or the output specifications are incorrect, the function returns an appropriate error code.
+ *
+ * @param out_type[in] The type of Python object to create (e.g., CPYOUT_TYPE_TUPLE, CPYOUT_TYPE_LIST,
+ * CPYOUT_TYPE_DICT).
+ * @param outputs[in] Array of output specifications, defining the values to include in the resulting Python object.
+ *                    Should not be null and must comply with the requirements for the specified `out_type`.
+ * @param out[out] Pointer to a PyObject pointer where the created Python object will be stored. Must not be null.
+ *
+ * @return cpyutl_output_status_t Status code indicating success (CPYOUT_SUCCESS) or the specific error
+ *                                encountered during object creation (e.g., CPYOUT_INVALID_SPEC,
+ * CPYOUT_FAILED_CONSTRUCTION).
+ */
 CPYUTL_INTERNAL
 cpyutl_output_status_t cpyutl_output_create(cpyutl_output_type_t out_type, const cpyutl_output_t outputs[],
                                             PyObject **out);
 
+/**
+ * @brief Wrapper around `cpyutl_output_create`, which raises a Python exception if parsing fails.
+ *
+ * @param out_type[in] The type of Python object to create (e.g., CPYOUT_TYPE_TUPLE, CPYOUT_TYPE_LIST,
+ * CPYOUT_TYPE_DICT).
+ * @param outputs[in] Array of output specifications, defining the values to include in the resulting Python object.
+ *                    Should not be null and must comply with the requirements for the specified `out_type`.
+ *
+ * @return Non-NULL when `cpyutl_output_create` succeeds, otherwise NULL with a raised Python exception.
+ */
 static inline PyObject *cpyutl_output_create_check(const cpyutl_output_type_t out_type, const cpyutl_output_t outputs[])
 {
     PyObject *out;
@@ -240,6 +267,23 @@ CPYUTL_INTERNAL CPYUTL_NORETURN void cpyutl_failure_exit(const char *fmt, ...);
 
 #endif
 
+/**
+ * @brief Adds a new type to a Python module from a given type specification.
+ *
+ * This function creates a Python type object from the provided type
+ * specification and optionally, a base type or tuple of base types. The
+ * resulting type is added to the specified module with a name derived
+ * from the given type specification. If the addition to the module fails,
+ * the function returns NULL.
+ *
+ * @param module[in] The target Python module to which the type will be added.
+ * @param spec[in] The type specification describing the new type to create.
+ * @param bases[in] Optional base type or tuple of base types for the new type,
+ *                  or NULL for default base types.
+ *
+ * @return A pointer to the newly created Python type object, or NULL if the
+ *         type creation or module addition fails.
+ */
 CPYUTL_INTERNAL
 PyTypeObject *cpyutl_add_type_from_spec_to_module(PyObject *module, PyType_Spec *spec, PyObject *bases);
 
