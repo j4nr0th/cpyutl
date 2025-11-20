@@ -1,4 +1,13 @@
+execute_process(
+        COMMAND "${Python_EXECUTABLE}"
+        -c "import numpy; print(numpy.get_include())"
+        OUTPUT_VARIABLE NumPy_INCLUDE_DIRS
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 
+if (NumPy_INCLUDE_DIRS STREQUAL "")
+    message(FATAL_ERROR "NumPy include directory not found.")
+endif ()
 
 list(APPEND
         MODULE_SOURCES
