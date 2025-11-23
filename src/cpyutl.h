@@ -37,6 +37,9 @@
  * @return Returns 0 if the array passes all validation checks, or -1 if any check fails.
  *         In the event of failure, a Python exception is set with an appropriate error message.
  */
+#ifdef __GNUC__
+__attribute__((unused))
+#endif
 static int check_input_array(const PyArrayObject *const arr, const unsigned n_dim, const npy_intp dims[static n_dim],
                              const int dtype, const int flags, const char *name)
 {
@@ -301,6 +304,9 @@ static inline PyObject *cpyutl_output_create_check(const cpyutl_output_type_t ou
 CPYUTL_INTERNAL
 int cpyutl_traverse_heap_type(PyObject *op, visitproc visit, void *arg);
 
+#ifdef __GNUC__
+__attribute__((format(printf, 1, 2)))
+#endif
 CPYUTL_INTERNAL CPYUTL_NORETURN void cpyutl_failure_exit(const char *fmt, ...);
 
 #define CPYUTL_ENABLE_ASSERTS
