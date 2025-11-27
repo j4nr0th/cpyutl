@@ -37,8 +37,59 @@
  * @return Returns 0 if the array passes all validation checks, or -1 if any check fails.
  *         In the event of failure, a Python exception is set with an appropriate error message.
  */
-CPYUTL_INTERNAL int check_input_array(const PyArrayObject *arr, unsigned n_dim, const npy_intp dims[static n_dim],
-                                      int dtype, int flags, const char *name);
+#ifdef __GNUC__
+__attribute__((unused))
+#endif
+static int check_input_array(const PyArrayObject *const arr, const unsigned n_dim, const npy_intp dims[static n_dim],
+                             const int dtype, const int flags, const char *name)
+{
+    if (!PyArray_Check(arr))
+    {
+        PyErr_Format(PyExc_TypeError, "Object %s is not a numpy array, but is %R.", name, Py_TYPE(arr));
+        return -1;
+    }
+
+    if (name == NULL)
+    {
+        name = "UNKNOWN";
+    }
+
+    const int arr_flags = PyArray_FLAGS(arr);
+    if ((arr_flags & flags) != flags)
+    {
+        PyErr_Format(PyExc_ValueError, "Array %s flags %u don't contain required flags %u.", name, arr_flags, flags);
+        return -1;
+    }
+
+    if (n_dim && PyArray_NDIM(arr) != (npy_intp)n_dim)
+    {
+        PyErr_Format(PyExc_ValueError,
+                     "Number of dimensions for the array %s does not match expected value (expected %u, got %u).", name,
+                     n_dim, (unsigned)PyArray_NDIM(arr));
+        return -1;
+    }
+
+    if (dtype >= 0 && PyArray_TYPE(arr) != dtype)
+    {
+        PyErr_Format(PyExc_ValueError, "Array %s does not have the expected type (expected %u, got %u).", name, dtype,
+                     PyArray_TYPE(arr));
+        return -1;
+    }
+
+    const npy_intp *const d = PyArray_DIMS(arr);
+    for (unsigned i_dim = 0; i_dim < n_dim; ++i_dim)
+    {
+        if (dims[i_dim] != 0 && d[i_dim] != dims[i_dim])
+        {
+            PyErr_Format(PyExc_ValueError,
+                         "Array %s dimension %u of the did not match expected value (expected %u, got %u).", name,
+                         i_dim, dims[i_dim], d[i_dim]);
+            return -1;
+        }
+    }
+
+    return 0;
+}
 #endif
 
 /**
@@ -253,6 +304,9 @@ static inline PyObject *cpyutl_output_create_check(const cpyutl_output_type_t ou
 CPYUTL_INTERNAL
 int cpyutl_traverse_heap_type(PyObject *op, visitproc visit, void *arg);
 
+#ifdef __GNUC__
+__attribute__((format(printf, 1, 2)))
+#endif
 CPYUTL_INTERNAL CPYUTL_NORETURN void cpyutl_failure_exit(const char *fmt, ...);
 
 #define CPYUTL_ENABLE_ASSERTS
