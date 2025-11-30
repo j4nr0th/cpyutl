@@ -140,7 +140,8 @@ static cpyutl_argument_status_t validate_arg_specs(const unsigned n, const cpyut
     return CPYARG_SUCCESS;
 }
 
-cpyutl_argument_status_t extract_argument_value(const unsigned i, PyObject *const val, cpyutl_argument_t *const arg)
+static cpyutl_argument_status_t extract_argument_value(const unsigned i, PyObject *const val,
+                                                       cpyutl_argument_t *const arg)
 {
     switch (arg->type)
     {
@@ -549,7 +550,7 @@ int cpyutl_traverse_heap_type(PyObject *op, const visitproc visit, void *arg)
     return 0;
 }
 
-const char *arg_status_strings[] = {
+static const char *arg_status_strings[] = {
     [CPYARG_SUCCESS] = "Parsed correctly",
     [CPYARG_MISSING] = "Argument was missing",
     [CPYARG_INVALID] = "Argument had invalid value",
