@@ -229,6 +229,7 @@ cpyutl_argument_status_t parse_arguments(cpyutl_argument_t specs[const], PyObjec
     }
 
     // Validate the arguments are properly specified.
+    (void)validate_arg_specs;
     CPYUTL_ASSERT(validate_arg_specs(n, specs, 0) == CPYARG_SUCCESS, "Invalid argument specs.");
     CPYUTL_ASSERT(
         nargs + nkwds <= n,
@@ -530,6 +531,7 @@ cpyutl_output_status_t cpyutl_output_create(const cpyutl_output_type_t out_type,
                   cpyutl_output_type_str(out_type));
     CPYUTL_ASSERT(validate_cpyutl_output_specs(outputs, out_type == CPYOUT_TYPE_DICT) == CPYOUT_SUCCESS,
                   "Output specifications were not valid (author is retarded).");
+    (void)validate_cpyutl_output_specs;
 
     switch (out_type)
     {
