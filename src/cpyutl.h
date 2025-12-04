@@ -309,7 +309,6 @@ __attribute__((format(printf, 1, 2)))
 #endif
 CPYUTL_INTERNAL CPYUTL_NORETURN void cpyutl_failure_exit(const char *fmt, ...);
 
-#define CPYUTL_ENABLE_ASSERTS
 #ifndef CPYUTL_ENABLE_ASSERTS
 #define CPYUTL_ASSERT(cond, fmt, ...) (void)0
 #else
