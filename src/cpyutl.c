@@ -111,6 +111,7 @@ static cpyutl_argument_status_t validate_arg_specs(const unsigned n, const cpyut
         case CPYARG_TYPE_DOUBLE:
         case CPYARG_TYPE_STRING:
         case CPYARG_TYPE_SEQUENCE:
+        case CPYARG_TYPE_CUSTOM:
             break;
 
         case CPYARG_TYPE_NONE:
