@@ -40,8 +40,9 @@
 #ifdef __GNUC__
 __attribute__((unused))
 #endif
-static int check_input_array(const PyArrayObject *const arr, const unsigned n_dim, const npy_intp dims[static n_dim],
-                             const int dtype, const int flags, const char *name)
+static int
+check_input_array(const PyArrayObject *const arr, const unsigned n_dim, const npy_intp dims[static n_dim],
+                  const int dtype, const int flags, const char *name)
 {
     if (!PyArray_Check(arr))
     {
@@ -145,7 +146,7 @@ typedef struct
         PyTypeObject *type_check;                                            // For type=ARG_TYPE_PYTHON
         int (*custom_convert)(PyObject *obj, void *p_val, const char *name); // For type=ARG_TYPE_CUSTOM
     };
-    int found; // Used to track if non-optional arguments were found. Set to zero.
+    int *p_found; // Used to track if non-optional arguments were found.
 } cpyutl_argument_t;
 
 CPYUTL_INTERNAL
@@ -307,7 +308,8 @@ int cpyutl_traverse_heap_type(PyObject *op, visitproc visit, void *arg);
 #ifdef __GNUC__
 __attribute__((format(printf, 1, 2)))
 #endif
-CPYUTL_INTERNAL CPYUTL_NORETURN void cpyutl_failure_exit(const char *fmt, ...);
+CPYUTL_INTERNAL CPYUTL_NORETURN void
+cpyutl_failure_exit(const char *fmt, ...);
 
 #ifndef CPYUTL_ENABLE_ASSERTS
 #define CPYUTL_ASSERT(cond, fmt, ...) (void)0
