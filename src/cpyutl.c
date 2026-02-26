@@ -1,5 +1,7 @@
 #include "cpyutl.h"
 
+#define VALUE_FOUND_POINTER ((int *)~0LLU)
+
 [[gnu::format(printf, 2, 3)]]
 void raise_exception_from_current(PyObject *exception, const char *format, ...)
 {
@@ -141,6 +143,36 @@ static cpyutl_argument_status_t validate_arg_specs(const unsigned n, const cpyut
     return CPYARG_SUCCESS;
 }
 
+static void mark_arg_as_found(cpyutl_argument_t *const arg)
+{
+    if (arg->p_found == NULL)
+    {
+        // Pointer was null, so we use the pointer itself to mark it
+        arg->p_found = VALUE_FOUND_POINTER;
+    }
+    else if (arg->p_found != VALUE_FOUND_POINTER)
+    {
+        // Pointer was not null and was not VALUE_FOUND_POINTER, so it
+        // should be valid
+        *arg->p_found = 1;
+    }
+}
+
+static int arg_was_found(const cpyutl_argument_t *const arg)
+{
+    // No pointer was given, and it had not been used for in-place storage
+    if (arg->p_found == NULL)
+    {
+        return 0;
+    }
+    // Pointer was not given, but we used it for in-place storage
+    if (arg->p_found == VALUE_FOUND_POINTER)
+    {
+        return 1;
+    }
+    return *arg->p_found;
+}
+
 static cpyutl_argument_status_t extract_argument_value(const unsigned i, PyObject *const val,
                                                        cpyutl_argument_t *const arg)
 {
@@ -203,7 +235,7 @@ static cpyutl_argument_status_t extract_argument_value(const unsigned i, PyObjec
         CPYUTL_ASSERT(0, "Should not be reached.");
         return CPYARG_BAD_SPECS;
     }
-    arg->found = 1;
+    mark_arg_as_found(arg);
 
     return CPYARG_SUCCESS;
 }
@@ -220,7 +252,10 @@ cpyutl_argument_status_t parse_arguments(cpyutl_argument_t specs[const], PyObjec
     unsigned n = 0;
     while (specs[n].type != CPYARG_TYPE_NONE)
     {
-        specs[n].found = 0;
+        if (specs[n].p_found != NULL)
+        {
+            *specs[n].p_found = 0;
+        }
         n += 1;
     }
     if (n == 0)
@@ -283,7 +318,7 @@ cpyutl_argument_status_t parse_arguments(cpyutl_argument_t specs[const], PyObjec
 
         cpyutl_argument_t *const arg = specs + i_arg;
 
-        if (arg->found)
+        if (arg_was_found(arg))
         {
             PyErr_Format(PyExc_TypeError, "Parameter \"%s\" was already specified.", kwd);
             return CPYARG_DUPLICATE;
@@ -296,12 +331,15 @@ cpyutl_argument_status_t parse_arguments(cpyutl_argument_t specs[const], PyObjec
 
     for (unsigned i = 0; i < n; ++i)
     {
-        const cpyutl_argument_t *const arg = specs + i;
-        if (arg->found == 0 && arg->optional == 0)
+        cpyutl_argument_t *const arg = specs + i;
+        if (!arg_was_found(arg) && arg->optional == 0)
         {
             PyErr_Format(PyExc_TypeError, "Non-optional parameter \"%s\" was not specified.", arg->kwname);
             return CPYARG_MISSING;
         }
+        // If we borrowed this pointer variable for internal storage, return it.
+        if (arg->p_found == VALUE_FOUND_POINTER)
+            arg->p_found = NULL;
     }
 
     return CPYARG_SUCCESS;
