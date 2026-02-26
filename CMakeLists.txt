@@ -20,4 +20,6 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     target_compile_options(cpyutl PRIVATE -Wall -Wextra -Werror)
 endif ()
 
-add_subdirectory(src/python)
+if (CMAKE_PROJECT_NAME STREQUAL "cpyutl")
+    add_subdirectory(src/python)
+endif()
