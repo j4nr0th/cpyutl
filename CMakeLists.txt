@@ -15,6 +15,7 @@ find_package(Python COMPONENTS Interpreter Development.Module Development.SABIMo
 
 add_library(cpyutl STATIC src/cpyutl.c)
 target_include_directories(cpyutl PRIVATE ${Python_INCLUDE_DIRS})
+target_include_directories(cpyutl INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     target_compile_options(cpyutl PRIVATE -Wall -Wextra -Werror)
