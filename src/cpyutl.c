@@ -334,7 +334,12 @@ cpyutl_argument_status_t parse_arguments(cpyutl_argument_t specs[const], PyObjec
         cpyutl_argument_t *const arg = specs + i;
         if (!arg_was_found(arg) && arg->optional == 0)
         {
-            PyErr_Format(PyExc_TypeError, "Non-optional parameter \"%s\" was not specified.", arg->kwname);
+            // Positional-only specifications legitimately carry a NULL keyword;
+            // formatting it with "%s" would dereference the null pointer.
+            if (arg->kwname)
+                PyErr_Format(PyExc_TypeError, "Non-optional parameter \"%s\" was not specified.", arg->kwname);
+            else
+                PyErr_Format(PyExc_TypeError, "Non-optional positional argument %u was not specified.", i);
             return CPYARG_MISSING;
         }
         // If we borrowed this pointer variable for internal storage, return it.
