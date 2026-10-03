@@ -267,10 +267,13 @@ cpyutl_argument_status_t parse_arguments(cpyutl_argument_t specs[const], PyObjec
     // Validate the arguments are properly specified.
     (void)validate_arg_specs;
     CPYUTL_ASSERT(validate_arg_specs(n, specs, 0) == CPYARG_SUCCESS, "Invalid argument specs.");
-    CPYUTL_ASSERT(
-        nargs + nkwds <= n,
-        "Number of specified arguments is less than the number of received arguments (n = %u, nargs = %u, nkwds = %u).",
-        n, (unsigned)nargs, (unsigned)nkwds);
+    // Too many arguments is the error coming from Python not C, so we do not assert.
+    if (nargs + (Py_ssize_t)nkwds > (Py_ssize_t)n)
+    {
+        PyErr_Format(PyExc_TypeError, "Function takes at most %u argument%s, but %u were given.", n, n == 1 ? "" : "s",
+                     (unsigned)(nargs + (Py_ssize_t)nkwds));
+        return CPYARG_TOO_MANY;
+    }
 
     for (unsigned i = 0; i < nargs; ++i)
     {
@@ -604,6 +607,7 @@ static const char *arg_status_strings[] = {
     [CPYARG_BAD_SPECS] = "Specifications were incorrect",
     [CPYARG_KW_AS_POS] = "Keyword argument was specified as a positional argument",
     [CPYARG_NO_KW] = "No argument has this keyword",
+    [CPYARG_TOO_MANY] = "More arguments were passed than the spec declares",
     [CPYARG_UNKNOWN] = "Unknown error",
     [CPYARG_KW_IN_SEQUENCE] = "Keyword argument was found in a sequence",
 };

@@ -131,6 +131,7 @@ typedef enum
     CPYARG_BAD_SPECS,      // Specifications were incorrect
     CPYARG_KW_AS_POS,      // Keyword argument was specified as a positional argument
     CPYARG_NO_KW,          // No argument has this keyword
+    CPYARG_TOO_MANY,       // More arguments were passed than the spec declares
     CPYARG_UNKNOWN,        // Unknown error
     CPYARG_KW_IN_SEQUENCE, // Keyword argument was found in a sequence
 } cpyutl_argument_status_t;
